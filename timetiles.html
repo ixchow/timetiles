@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<title>tchow timetiles sequencing mockup</title>
+
+<script type="text/javascript" src="timetiles.js" ></script>
+<style>
+html, body {
+	overflow:hidden;
+}
+body {
+	background: #222;
+	color: #555;
+	text-align: center;
+}
+body.winning {
+	background: yellow;
+}
+img.tile {
+	position:absolute;
+	left:0;
+	top:0;
+	box-shadow: 2px 2px 2px #000;
+}
+img.dragging {
+	box-shadow: 2px 2px 20px #000;
+	z-index: 1;
+}
+.winning img.tile {
+	box-shadow: 2px 2px 2px #f0f;
+}
+</style>
+</head>
+<body onload="setup();">
+<div class="board">
+
+<img class="tile" src="elephant.png" goalOrder="4" />
+<img class="tile" src="chick.png" goalOrder="2" />
+<img class="tile" src="egg.png" goalOrder="1" />
+<img class="tile" src="rooster.png" goalOrder="3" />
+
+</div>
+</body>
+</html>
