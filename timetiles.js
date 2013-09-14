@@ -1,4 +1,5 @@
 var mouseobj = {}; //just some object for potential future multi-drag-action.
+var touchobjs = [];
 
 function startdrag(node, pointer, pointerX, pointerY) {
 	if (node.dragInfo) {
@@ -116,8 +117,34 @@ function draw(timestamp) {
 	prevTimestamp = timestamp;
 
 	var tiles = document.getElementsByClassName("tile");
+
+	var maxTileWidth = (window.innerWidth / tiles.length) * 0.9;
+	var maxTileHeight = window.innerHeight * 0.9;
+
 	for (var i = 0; i < tiles.length; ++i) {
 		var tile = tiles[i];
+
+		var w = tile.naturalWidth;
+		var h = tile.naturalHeight;
+
+		if (w > maxTileWidth) {
+			var scale = maxTileWidth / w;
+			w *= scale;
+			h *= scale;
+		}
+		if (h > maxTileHeight) {
+			var scale = maxTileHeight / h;
+			w *= scale;
+			h *= scale;
+		}
+
+		w = Math.round(w);
+		h = Math.round(h);
+
+		if (w != tile.width || h != tile.height) {
+			tile.width = w;
+			tile.height = h;
+		}
 
 		if (!tile.hasOwnProperty('velX')) tile.velX = 0.0;
 		if (!tile.hasOwnProperty('velY')) tile.velY = 0.0;
@@ -192,4 +219,51 @@ function setup() {
 			stopdrag(mouseobj);
 		}
 	}
+	window.addEventListener('touchstart', function(ev) {
+		ev.preventDefault();
+		var touches = ev.changedTouches;
+		for (var i = 0; i < touches.length; ++i) {
+			var touch = touches[i];
+			if (!touch.target.classList.contains("tile")) continue;
+			var touchobj = {id:touch.identifier};
+			touchobjs.push(touchobj);
+			startdrag(touch.target, touchobj, touch.pageX, touch.pageY);
+		}
+	});
+	window.addEventListener('touchmove', function(ev) {
+		ev.preventDefault();
+		var touches = ev.changedTouches;
+		for (var i = 0; i < touches.length; ++i) {
+			var touch = touches[i];
+			var touchobj = null;
+			for (var o = 0; o < touchobjs.length; ++o) {
+				if (touchobjs[o].id == touch.identifier) {
+					touchobj = touchobjs[o];
+					break;
+				}
+			}
+			if (!touchobj) {
+				console.error("missing touch obj?");
+				continue;
+			}
+			updatedrag(touchobj, touch.pageX, touch.pageY);
+		}
+	});
+	function endtouch(ev) {
+		ev.preventDefault();
+		var touches = ev.changedTouches;
+		for (var i = 0; i < touches.length; ++i) {
+			var touch = touches[i];
+			var touchobj = null;
+			for (var o = 0; o < touchobjs.length; ++o) {
+				if (touchobjs[o].id == touch.identifier) {
+					stopdrag(touchobjs[o]);
+					touchobjs.splice(o,1);
+					break;
+				}
+			}
+		}
+	}
+	window.addEventListener('touchend', endtouch);
+	window.addEventListener('touchcancel', endtouch);
 }
